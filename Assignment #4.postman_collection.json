@@ -1,0 +1,232 @@
+{
+	"info": {
+		"_postman_id": "4bfcf65c-5c93-48ec-9c20-63398cdffc94",
+		"name": "Assignment #4",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19231508"
+	},
+	"item": [
+		{
+			"name": "API requests",
+			"item": [
+				{
+					"name": "Get single product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Schema is Valid\",function(){",
+									"    const schema={",
+									"        type:'object',",
+									"        properties:{",
+									"            id:{",
+									"                type:'integer'",
+									"            },",
+									"            category:{",
+									"                type:\"string\"",
+									"            },",
+									"            name:{",
+									"                type:\"string\"",
+									"            },",
+									"            isAvailable:{",
+									"                type:'boolean'",
+									"            },",
+									"             ['product-description']:{",
+									"                type:\"string\"",
+									"            },",
+									"             additionalText:{",
+									"                type:\"string\"",
+									"            }",
+									"            ",
+									"        },",
+									"        required:['id','category','name','isAvailable','additionalText','product-description'],",
+									"        additionalProperties:false",
+									"        ",
+									"    };",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/:productId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								":productId"
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "1001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Check your solution",
+			"item": [
+				{
+					"name": "New Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let collection = pm.response.json().collection",
+									"",
+									"pm.test(\"If you have any failures, review the failed test results or ask for support in the community forum. Remember to save your changes if you update the collection.\", () => {",
+									"});",
+									"",
+									"pm.test(\"Status code is 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Correct collection returned\", () => {",
+									"    pm.expect(collection.info.name).contains(\"Assignment #4\")",
+									"});",
+									"",
+									"pm.test(\"API key secure\", () => {",
+									"    let apiKey = collection.variable.find(item => { return item.key === \"postman_api_key\"});",
+									"    pm.expect(apiKey.value, 'API key visible under Initial value').does.not.include(\"PMAK\");",
+									"});",
+									"",
+									"let folder = collection.item.find(fol => {return fol.name === \"API requests\"});",
+									"",
+									"const chai = require('chai');",
+									"const originalJsonSchema = chai.Assertion.prototype.jsonSchema;",
+									"let userTests;",
+									"",
+									"pm.test('Request \"Get single product\" exists and has tests', () => {",
+									"    request = folder.item.find(r => { return r.name === \"Get single product\"});",
+									"    pm.expect(request).to.be.an('object', 'Request \"Get single product\" not found.');",
+									"    pm.expect(request.event).to.be.an('array', 'The request has no scripts');",
+									"    userTests = request.event.find(event => event.listen === 'test');",
+									"    pm.expect(userTests).to.be.an('object', 'The request has no test script.');",
+									"    pm.expect(userTests.script.exec.toString(), 'The request has no tests.').includes(\"pm.test\");",
+									"    pm.expect(userTests.script.exec.toString(), \"The tests don't verify the response schema.\").includes('jsonSchema');",
+									"});",
+									"",
+									"",
+									"// Override the jsonSchema method",
+									"chai.Assertion.addMethod('jsonSchema', function(userSchema) {",
+									"    chai.Assertion.prototype.jsonSchema = originalJsonSchema;",
+									"    // Task #1 Mock response that is not an object",
+									"    let response = [];",
+									"    pm.expect(response, 'Task #1: Ensure that the response is an object.').not.to.be.jsonSchema(userSchema);",
+									"",
+									"    // Task #2 Required property is missing",
+									"    response = {",
+									"        //\"id\": 1001, // Removed id on purpose to check that the schema fails.",
+									"        \"category\": \"coffee\",",
+									"        \"name\": \"Espresso\",",
+									"        \"isAvailable\": true,",
+									"        \"product-description\": \"A rich, dark, and full-bodied coffee with a bold flavor and intense aroma.\",",
+									"        \"additionalText\": \"Contains caffeine\"",
+									"    }",
+									"    pm.expect(response, 'Task #2: Ensure that all properties are required.').not.to.be.jsonSchema(userSchema);",
+									"",
+									"    // Task #3 Additional properties are not allowed",
+									"    response = {",
+									"        \"id\": 1001,",
+									"        \"category\": \"coffee\",",
+									"        \"name\": \"Espresso\",",
+									"        \"isAvailable\": true,",
+									"        \"product-description\": \"A rich, dark, and full-bodied coffee with a bold flavor and intense aroma.\",",
+									"        \"additionalText\": \"Contains caffeine\",",
+									"        \"foo\": \"bar\" // added an additional property",
+									"    }",
+									"    pm.expect(response, 'Task #3: Additional properties are not allowed.').not.to.be.jsonSchema(userSchema);    ",
+									"",
+									"    // Mock response",
+									"    pm.response.json = function() {",
+									"        return response;",
+									"    };    ",
+									"",
+									"});",
+									"eval(userTests.script.exec.join('\\n').replace('\\\"', '\"'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://api.getpostman.com/collections/:collectionId?apikey={{postman_api_key}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"getpostman",
+								"com"
+							],
+							"path": [
+								"collections",
+								":collectionId"
+							],
+							"query": [
+								{
+									"key": "apikey",
+									"value": "{{postman_api_key}}"
+								}
+							],
+							"variable": [
+								{
+									"key": "collectionId",
+									"value": "{{collectionid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "postman_api_key",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "collectionid",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
